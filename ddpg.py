@@ -13,10 +13,13 @@ from OUNoise import OUNoise
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
-	def __init__(self, state_size, action_size, seed):
+	def __init__(self, state_size, action_size, n_agents, seed):
 		self.state_size = state_size
 		self.action_size = action_size
 		self.seed = random.seed(seed)
+
+		self.stacked_state_size = state_size * n_agents
+		self.stacked_action_size = action_size * n_agents
 
 		# Actor networks
 		self.actor_local = ActorNetwork(state_size, action_size, seed).to(device)
@@ -24,12 +27,9 @@ class Agent():
 		self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR)
 
 		# Critic networks
-		self.critic_local = CriticNetwork(state_size, action_size, seed).to(device)
-		self.critic_target = CriticNetwork(state_size, action_size, seed).to(device)
+		self.critic_local = CriticNetwork(self.stacked_state_size, self.stacked_action_size, seed).to(device)
+		self.critic_target = CriticNetwork(self.stacked_state_size, self.stacked_action_size, seed).to(device)
 		self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR)
-
-		# Replay memory
-		self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, BATCH_SIZE, seed)
 
 		# OUNoise
 		self.exploration_noise = OUNoise(action_size, seed)
@@ -47,36 +47,8 @@ class Agent():
 
 		return np.clip(action, -1, 1)
 
-	def step(self, state, action, reward, next_state, done):
-		self.memory.add(state, action, reward, next_state, done)
-		if len(self.memory) > BATCH_SIZE:
-			self.learn()
-
-	def learn(self):
-		states, actions, rewards, next_states, dones = self.memory.sample()
-		next_actions = self.actor_target(next_states)
-		y = rewards + GAMMA * self.critic_target(next_states, next_actions) * (1 - dones)
-		
-		# Critic loss
-		critic_loss = F.mse_loss(y, self.critic_local(states, actions))
-		
-		# Critic backprop 
-		self.critic_optimizer.zero_grad()
-		critic_loss.backward()
-		self.critic_optimizer.step()
-
-		# Actor loss
-		cur_actions = self.actor_local(states)
-		actor_loss = self.critic_local(states, cur_actions)
-		actor_loss = -actor_loss.mean()
-
-		# Actor backprop
-		self.actor_optimizer.zero_grad()
-		actor_loss.backward()
-		self.actor_optimizer.step()
-
-		# Soft updates
-		self.update_target_network()
+	def update(self):
+		return 0
 
 	def update_target_network(self):
 		for target_param, local_param in zip(self.actor_target.parameters(), self.actor_local.parameters()):

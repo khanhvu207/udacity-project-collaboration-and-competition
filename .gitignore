@@ -8,3 +8,4 @@ Tennis_Linux/
 # Logs
 unity-environment.log
 .ipynb_checkpoints
+__pycache__/
