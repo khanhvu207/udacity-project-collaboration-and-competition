@@ -47,8 +47,31 @@ class Agent():
 
 		return np.clip(action, -1, 1)
 
-	def update(self):
-		return 0
+	def update(self, states, current_agent_states, actions, current_agent_actions, target_next_actions, rewards, current_agent_rewards, next_states, dones, current_agent_dones, action_preds):
+		flatten_states = torch.reshape(states, shape=(BATCH_SIZE, -1))
+		flatten_next_states = torch.reshape(next_states, shape=(BATCH_SIZE, -1))
+		flatten_actions = torch.reshape(actions, shape=(BATCH_SIZE, -1))
+
+		y = current_agent_rewards + GAMMA * self.critic_target(flatten_next_states, target_next_actions)
+
+		# Critic loss
+		critic_loss = F.mse_loss(y, self.critic_local(flatten_states, flatten_actions))
+
+		# Critic backprop 
+		self.critic_optimizer.zero_grad()
+		critic_loss.backward()
+		self.critic_optimizer.step()
+
+		# Actor loss
+		actor_loss = -self.critic_local(flatten_states, action_preds).mean()
+
+		# Actor backprop
+		self.actor_optimizer.zero_grad()
+		actor_loss.backward()
+		self.actor_optimizer.step()
+
+		# Soft updates
+		self.update_target_network()
 
 	def update_target_network(self):
 		for target_param, local_param in zip(self.actor_target.parameters(), self.actor_local.parameters()):
