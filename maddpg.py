@@ -36,7 +36,10 @@ class MADDPG():
 		return np.stack(actions, axis=0)
 
 	def step(self, state, action, reward, next_state, done):
-		return 0
+		self.memory.add(state, action, reward, next_state, done)
+		if len(self.memory) > BATCH_SIZE:
+			for i in range(self.n_agents):
+				self.learn(i)
 
-	def learn(self):
+	def learn(self, agent_index):
 		return 0
