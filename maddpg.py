@@ -42,4 +42,19 @@ class MADDPG():
 				self.learn(i)
 
 	def learn(self, agent_index):
-		return 0
+		states, actions, rewards, next_states, dones = self.memory.sample()
+		
+		target_next_actions = torch.from_numpy(np.zeros(shape=actions.shape)).float().to(device)
+		for idx, agent in enumerate(self.ActorCriticAgents):
+			current_states = states[:, idx]
+			target_next_actions[:, idx, :] = agent.actor_target(current_states)
+
+		target_next_actions = torch.reshape(target_next_actions, shape=(BATCH_SIZE, -1))
+		current_agent_states = states[:, agent_index, :]
+		current_agent_actions = actions[:, agent_index, :]
+		current_agent_rewards = torch.reshape(rewards[:, agent_index], shape=(BATCH_SIZE, 1))
+		current_agent_dones = torch.reshape(dones[:, agent_index], shape=(BATCH_SIZE, 1))
+		
+		self.ActorCriticAgents[agent_index].learn(target_next_actions, current_agent_states, current_agent_actions, current_agent_rewards, current_agent_dones)
+		
+
