@@ -1,3 +1,10 @@
 # Virtual env
 drlnd/
 python/
+
+# Simulator
+Tennis_Linux/
+
+# Logs
+unity-environment.log
+.ipynb_checkpoints
