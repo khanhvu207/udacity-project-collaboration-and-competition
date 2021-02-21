@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ActorNetwork(nn.Module):
-	def __init__(self, state_size, action_size, seed, hidden_size1=128, hidden_size2=128):
+	def __init__(self, state_size, action_size, seed, hidden_size1=256, hidden_size2=128):
 		super(ActorNetwork, self).__init__()
 		self.seed = torch.manual_seed(seed)
 		self.fc1 = nn.Linear(state_size, hidden_size1)
@@ -20,7 +20,7 @@ class ActorNetwork(nn.Module):
 		return x
 
 class CriticNetwork(nn.Module):
-	def __init__(self, state_size, action_size, seed, hidden_size1=128, hidden_size2=128):
+	def __init__(self, state_size, action_size, seed, hidden_size1=256, hidden_size2=128):
 		super(CriticNetwork, self).__init__()
 		self.seed = torch.manual_seed(seed)
 		self.fc1 = nn.Linear(state_size, hidden_size1)

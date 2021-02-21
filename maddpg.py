@@ -35,8 +35,9 @@ class MADDPG():
 			actions.append(agent_action[0])
 		return np.stack(actions, axis=0)
 
-	def step(self, state, action, reward, next_state, done):
+	def step(self, ep, state, action, reward, next_state, done):
 		self.memory.add(state, action, reward, next_state, done)
+
 		if len(self.memory) > BATCH_SIZE:
 			for i in range(self.n_agents):
 				self.learn(i)
@@ -50,13 +51,16 @@ class MADDPG():
 			target_next_actions[:, idx, :] = agent.actor_target(current_states)
 
 		target_next_actions = torch.reshape(target_next_actions, shape=(BATCH_SIZE, -1))
+
 		current_agent_states = states[:, agent_index, :]
 		current_agent_actions = actions[:, agent_index, :]
 		current_agent_rewards = torch.reshape(rewards[:, agent_index], shape=(BATCH_SIZE, 1))
 		current_agent_dones = torch.reshape(dones[:, agent_index], shape=(BATCH_SIZE, 1))
+
 		action_preds = actions.clone()
-		action_preds[:, agent_index, :] = agent.actor_local(current_agent_states)
+		action_preds[:, agent_index, :] = self.ActorCriticAgents[agent_index].actor_local(current_agent_states)
 		action_preds = torch.reshape(action_preds, shape=(BATCH_SIZE, -1))
+		
 		self.ActorCriticAgents[agent_index].update(states, current_agent_states, actions, current_agent_actions, target_next_actions, rewards, current_agent_rewards, next_states, dones, current_agent_dones, action_preds)
 		
 	def save_checkpoint(self):

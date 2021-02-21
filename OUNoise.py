@@ -6,11 +6,12 @@ import copy
 import random
 import numpy as np
 
+from config import *
 
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
-    def __init__(self, size, seed, mu=0.0, theta=0.1, sigma=.2, sigma_min=.1, sigma_decay=.99):
+    def __init__(self, size, seed, mu=MU, theta=THETA, sigma=SIGMA, sigma_min=SIGMA_MIN, sigma_decay=SIGMA_DECAY):
         """Initialize parameters and noise process."""
         self.mu = mu * np.ones(size)
         self.theta = theta

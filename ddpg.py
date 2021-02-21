@@ -24,12 +24,12 @@ class Agent():
 		# Actor networks
 		self.actor_local = ActorNetwork(state_size, action_size, seed).to(device)
 		self.actor_target = ActorNetwork(state_size, action_size, seed).to(device)
-		self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR)
+		self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=ACTOR_LR)
 
 		# Critic networks
 		self.critic_local = CriticNetwork(self.stacked_state_size, self.stacked_action_size, seed).to(device)
 		self.critic_target = CriticNetwork(self.stacked_state_size, self.stacked_action_size, seed).to(device)
-		self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR)
+		self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=CRITIC_LR)
 
 		# OUNoise
 		self.exploration_noise = OUNoise(action_size, seed)
@@ -52,7 +52,7 @@ class Agent():
 		flatten_next_states = torch.reshape(next_states, shape=(BATCH_SIZE, -1))
 		flatten_actions = torch.reshape(actions, shape=(BATCH_SIZE, -1))
 
-		y = current_agent_rewards + GAMMA * self.critic_target(flatten_next_states, target_next_actions)
+		y = current_agent_rewards + GAMMA * self.critic_target(flatten_next_states, target_next_actions) * (1 - current_agent_dones)
 
 		# Critic loss
 		critic_loss = F.mse_loss(y, self.critic_local(flatten_states, flatten_actions))

@@ -1,5 +1,14 @@
-LR = 3E-4
+# Actor-critc params
+ACTOR_LR = 1E-4
+CRITIC_LR = 3E-4
 GAMMA = 0.99
-BATCH_SIZE = 64
-TAU = 1e-3
+BATCH_SIZE = 128
+TAU = 0.01
 BUFFER_SIZE = 1000000
+
+# OUNoise params
+SIGMA = 0.2
+SIGMA_MIN = 0.1
+SIGMA_DECAY = 0.99
+MU = 0
+THETA = 0.1
